@@ -1,16 +1,13 @@
-import { ButtonModule } from 'primeng/button';
 import { Component } from '@angular/core';
-import { environment } from '../environments/environment';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  imports: [ButtonModule],
+  standalone: true,
+  imports: [RouterModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.sass',
 })
 export class AppComponent {
   title = 'angular-template';
-  constructor() {
-    console.log(environment.exampleEnv);
-  }
 }

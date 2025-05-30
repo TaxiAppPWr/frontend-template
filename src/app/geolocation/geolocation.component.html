@@ -1,0 +1,21 @@
+<p>Rozpocznij pracę kierowcy</p>
+<div class="geo-container">
+  <p-button
+    label="Rozpocznij"
+    (onClick)="getLocation()"
+    styleClass="p-button-outlined"
+  ></p-button>
+
+  <div *ngIf="position" class="result">
+    <p>
+      <strong>Szerokość geograficzna:</strong> {{ position.coords.latitude }}
+    </p>
+    <p>
+      <strong>Długość geograficzna:</strong> {{ position.coords.longitude }}
+    </p>
+  </div>
+
+  <div *ngIf="error" class="error">
+    <p>{{ error }}</p>
+  </div>
+</div>
