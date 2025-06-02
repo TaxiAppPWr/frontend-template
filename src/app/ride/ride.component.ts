@@ -5,11 +5,18 @@ import { ButtonModule } from 'primeng/button';
 import { HttpClient } from '@angular/common/http';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-ride',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonModule, ToastModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ButtonModule,
+    ToastModule,
+    HttpClientModule,
+  ],
   providers: [MessageService],
   templateUrl: './ride.component.html',
   styleUrl: './ride.component.sass',
@@ -29,28 +36,26 @@ export class RideComponent {
   showPrice() {
     const body = { skad: this.from, dokad: this.to };
 
-    this.http
-      .post<{ price: number }>('http://localhost:56/ride/pay', body)
-      .subscribe({
-        next: (response) => {
-          this.price = response.price;
-          this.showOffer = true;
-          this.showSummary = false;
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Sukces',
-            detail: 'Cena została pobrana',
-          });
-        },
-        error: (err) => {
-          console.error(err);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Błąd',
-            detail: 'Nie udało się pobrać ceny',
-          });
-        },
-      });
+    this.http.post<{ price: number }>('http://localhost:', body).subscribe({
+      next: (response) => {
+        this.price = response.price;
+        this.showOffer = true;
+        this.showSummary = false;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Sukces',
+          detail: 'Cena została pobrana',
+        });
+      },
+      error: (err) => {
+        console.error(err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Błąd',
+          detail: 'Nie znaleziono przejazdu',
+        });
+      },
+    });
   }
 
   confirm() {

@@ -1,10 +1,16 @@
 <p>Rozpocznij pracę kierowcy</p>
 <div class="geo-container">
   <p-button
-    label="Rozpocznij"
-    (onClick)="getLocation()"
+    [label]="tracking ? 'Zakończ' : 'Rozpocznij'"
+    (onClick)="toggleTracking()"
     styleClass="p-button-outlined"
   ></p-button>
+
+  <button pButton (click)="getAccountStatus()">Sprawdź stan konta</button>
+
+  <div *ngIf="accountStatus">
+    <pre>{{ accountStatus | json }}</pre>
+  </div>
 
   <div *ngIf="position" class="result">
     <p>
