@@ -4,12 +4,12 @@
 
   <div class="form-group">
     <label for="from">Skąd:</label>
-    <input id="from" [(ngModel)]="from" placeholder="np. ul. X" />
+    <input id="from" [(ngModel)]="from" placeholder="np. ul. X" #fromInput />
   </div>
 
   <div class="form-group">
     <label for="to">Dokąd:</label>
-    <input id="to" [(ngModel)]="to" placeholder="np. ul. Y" />
+    <input id="to" [(ngModel)]="to" placeholder="np. ul. Y" #toInput />
   </div>
 
   <p-button
@@ -19,10 +19,11 @@
     styleClass="p-button-sm p-button-primary"
   ></p-button>
 
+  <!-- Oferta cenowa -->
   <div class="offer" *ngIf="showOffer">
-    <p *ngIf="price !== null"><strong>Cena przejazdu:</strong> 30zł</p>
-    <!-- 
-     {{ price }} zł</p> -->
+    <p *ngIf="price !== null">
+      <strong>Cena przejazdu:</strong> {{ price }} zł
+    </p>
     <p-button
       label="Tak"
       (onClick)="confirm()"
@@ -30,13 +31,26 @@
     ></p-button>
     <p-button
       label="Nie"
-      (onClick)="cancel()"
+      (onClick)="cancelRide()"
       styleClass="p-button-sm p-button-danger"
     ></p-button>
   </div>
 
   <div class="summary" *ngIf="showSummary">
-    <p>Przejazd: {{ from }} → {{ to }} | 30zł</p>
-    <!--{{ price }} zł</p> -->
+    <p>Przejazd: {{ from }} → {{ to }} | {{ price }} zł</p>
+  </div>
+
+  <div *ngIf="currentRideStatus" class="ride-status">
+    <h3>Status ostatniego przejazdu: {{ currentRideStatus.status }}</h3>
+    <p *ngIf="currentRideStatus.driverName">
+      Kierowca: {{ currentRideStatus.driverName }}
+    </p>
+
+    <p-button
+      *ngIf="currentRideStatus.status === 'oczekujący'"
+      label="Anuluj przejazd"
+      (onClick)="cancelRide()"
+      styleClass="p-button-sm p-button-warning"
+    ></p-button>
   </div>
 </div>

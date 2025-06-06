@@ -1,18 +1,25 @@
-<p>Rozpocznij pracę kierowcy</p>
-<div class="geo-container">
+<p class="text-lg font-semibold mb-2">Rozpocznij pracę kierowcy</p>
+
+<div class="geo-container flex flex-column gap-3">
   <p-button
-    [label]="tracking ? 'Zakończ' : 'Rozpocznij'"
+    [label]="
+      tracking ? (rideAccepted ? 'Przejazd w toku' : 'Zakończ') : 'Rozpocznij'
+    "
+    [disabled]="rideAccepted"
     (onClick)="toggleTracking()"
     styleClass="p-button-outlined"
   ></p-button>
 
-  <button pButton (click)="getAccountStatus()">Sprawdź stan konta</button>
+  <button pButton label="Sprawdź stan konta" (click)="getAccountStatus()">
+    Sprawdź stan konta
+  </button>
 
-  <div *ngIf="accountStatus">
-    <pre>{{ accountStatus | json }}</pre>
+  <div *ngIf="accountStatus" class="p-2 surface-100 border-round">
+    <strong>Stan konta:</strong>
+    <pre class="m-0">{{ accountStatus | json }}</pre>
   </div>
 
-  <div *ngIf="position" class="result">
+  <div *ngIf="position" class="result p-2 surface-200 border-round">
     <p>
       <strong>Szerokość geograficzna:</strong> {{ position.coords.latitude }}
     </p>
@@ -21,7 +28,70 @@
     </p>
   </div>
 
-  <div *ngIf="error" class="error">
+  <div *ngIf="error" class="error text-red-600">
     <p>{{ error }}</p>
   </div>
+</div>
+
+<p-dialog
+  header="Nowy przejazd"
+  [(visible)]="showRideDialog"
+  [modal]="true"
+  [closable]="false"
+>
+  <div class="p-2">
+    <p><strong>Nowa propozycja przejazdu:</strong></p>
+    <p><strong>Od:</strong> {{ currentRide?.pickupLocation }}</p>
+    <p><strong>Do:</strong> {{ currentRide?.destination }}</p>
+    <p><strong>Pasażer:</strong> {{ currentRide?.passengerName }}</p>
+
+    <div class="flex justify-content-end gap-2 mt-3">
+      <button
+        pButton
+        label="Odrzuć"
+        (click)="rejectRide()"
+        class="p-button-secondary"
+      >
+        Odrzuć
+      </button>
+      <button
+        pButton
+        label="Akceptuj"
+        (click)="acceptRide()"
+        class="p-button-success"
+      >
+        Akceptuj
+      </button>
+    </div>
+  </div>
+</p-dialog>
+
+<div
+  *ngIf="rideAccepted && currentRide"
+  class="ride-status mt-3 surface-100 p-3 border-round"
+>
+  <p>
+    <strong>Trwa przejazd:</strong> {{ currentRide.pickupLocation }} →
+    {{ currentRide.destination }}
+  </p>
+
+  <button
+    *ngIf="!rideArrived"
+    pButton
+    label="Potwierdź dotarcie"
+    (click)="confirmArrival()"
+    class="p-button-info mt-2"
+  >
+    Potwierdź dotarcie
+  </button>
+
+  <button
+    *ngIf="rideArrived"
+    pButton
+    label="Zakończ przejazd"
+    (click)="finishRide()"
+    class="p-button-success mt-2"
+  >
+    Zakończ przejazd
+  </button>
 </div>
