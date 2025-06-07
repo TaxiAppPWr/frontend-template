@@ -1,6 +1,10 @@
-<nav class="nav">
-  <a routerLink="/ride" routerLinkActive="active">Passager</a>
-  <a routerLink="/geo" routerLinkActive="active">Driver</a>
+<nav class="nav flex items-center justify-between px-4 py-2 bg-gray-100">
+<!--  <div class="flex space-x-4">-->
+<!--    <a routerLink="/ride" routerLinkActive="active">Passager</a>-->
+<!--    <a routerLink="/geo" routerLinkActive="active">Driver</a>-->
+<!--  </div>-->
+  <button class="ml-auto px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Logout</button>
 </nav>
 
 <router-outlet></router-outlet>
+<app-notification></app-notification>
