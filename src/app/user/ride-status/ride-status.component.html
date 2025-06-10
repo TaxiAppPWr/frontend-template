@@ -1,1 +1,15 @@
-<p>ride-status works!</p>
+<div class="container">
+  <div *ngIf="currentRideStatus" class="ride-status">
+    <h3>Status ostatniego przejazdu: {{ currentRideStatus.status }}</h3>
+    <p *ngIf="currentRideStatus.driverName">
+      Kierowca: {{ currentRideStatus.driverName }}
+    </p>
+
+    <p-button
+      *ngIf="currentRideStatus.status === 'oczekujący'"
+      label="Anuluj przejazd"
+      (onClick)="cancelRide()"
+      styleClass="p-button-sm p-button-warning"
+    ></p-button>
+  </div>
+</div>
