@@ -1,10 +1,4 @@
-import {
-  Component,
-  AfterViewInit,
-  ViewChild,
-  ElementRef,
-  NgZone,
-} from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
@@ -14,6 +8,7 @@ import { MessageService } from 'primeng/api';
 import { HttpClientModule } from '@angular/common/http';
 
 @Component({
+  standalone: true,
   selector: 'app-new-ride',
   imports: [
     CommonModule,
@@ -23,9 +18,9 @@ import { HttpClientModule } from '@angular/common/http';
     HttpClientModule,
   ],
   templateUrl: './new-ride.component.html',
-  styleUrl: './new-ride.component.sass',
+  styleUrls: ['./new-ride.component.sass'],
 })
-export class NewRideComponent implements AfterViewInit {
+export class NewRideComponent {
   constructor(
     private http: HttpClient,
     private messageService: MessageService,
@@ -35,36 +30,46 @@ export class NewRideComponent implements AfterViewInit {
   rideId: string | null = null;
   from = '';
   to = '';
+  fromSuggestions: string[] = [];
+  toSuggestions: string[] = [];
   passengerUsername = '';
   price: number | null = null;
   showOffer = false;
   showSummary = false;
 
-  @ViewChild('fromInput') fromInput!: ElementRef;
-  @ViewChild('toInput') toInput!: ElementRef;
-
-  ngAfterViewInit() {
-    this.initAutocomplete(this.fromInput, 'from');
-    this.initAutocomplete(this.toInput, 'to');
+  selectSuggestion(suggestion: string, field: 'from' | 'to') {
+    if (field === 'from') {
+      this.from = suggestion;
+      this.fromSuggestions = [];
+    } else {
+      this.to = suggestion;
+      this.toSuggestions = [];
+    }
   }
 
-  initAutocomplete(input: ElementRef, field: 'from' | 'to') {
-    const autocomplete = new google.maps.places.Autocomplete(
-      input.nativeElement,
-      {
-        types: ['address'],
-        componentRestrictions: { country: 'pl' },
-      },
-    );
+  fetchSuggestions(query: string, field: 'from' | 'to') {
+    if (query.length < 3) {
+      if (field === 'from') this.fromSuggestions = [];
+      else this.toSuggestions = [];
+      return;
+    }
 
-    autocomplete.addListener('place_changed', () => {
-      this.ngZone.run(() => {
-        const place = autocomplete.getPlace();
-        if (place && place.formatted_address) {
-          this[field] = place.formatted_address;
-        }
+    this.http
+      .get<string[]>('http://localhost/api/autocomplete', {
+        params: { input: query },
+      })
+      .subscribe({
+        next: (response) => {
+          if (field === 'from') {
+            this.fromSuggestions = response;
+          } else {
+            this.toSuggestions = response;
+          }
+        },
+        error: (err) => {
+          console.error(err);
+        },
       });
-    });
   }
 
   showPrice() {
