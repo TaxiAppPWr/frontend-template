@@ -6,6 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { HttpClientModule } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 @Component({
   standalone: true,
@@ -55,7 +56,7 @@ export class NewRideComponent {
     }
 
     this.http
-      .get<string[]>('http://localhost/api/autocomplete', {
+      .get<string[]>(`${environment.backendUrl}/api/autocomplete`, {
         params: { input: query },
       })
       .subscribe({
@@ -76,7 +77,7 @@ export class NewRideComponent {
     const body = { skad: this.from, dokad: this.to };
 
     this.http
-      .post<{ price: number }>('http://localhost/api/ride/price', body)
+      .post<{ price: number }>(`${environment.backendUrl}/api/ride/price`, body)
       .subscribe({
         next: (response) => {
           this.price = response.price;
@@ -125,15 +126,18 @@ export class NewRideComponent {
     };
 
     this.http
-      .post<{ rideId: string }>('http://localhost/api/ride/new', body)
+      .post<{ rideId: string }>(`${environment.backendUrl}/api/ride/new`, body)
       .subscribe({
         next: (response) => {
           this.rideId = response.rideId;
 
           this.http
-            .get<{ redirectUri: string }>('http://localhost/api/paymentLink', {
-              params: { rideId: this.rideId },
-            })
+            .get<{ redirectUri: string }>(
+              `${environment.backendUrl}/api/passengerPayment/paymentLink`,
+              {
+                params: { rideId: this.rideId },
+              },
+            )
             .subscribe({
               next: (paymentResponse) => {
                 this.messageService.add({
