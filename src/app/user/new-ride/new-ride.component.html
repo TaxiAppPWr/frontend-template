@@ -2,15 +2,43 @@
   <p-toast></p-toast>
   <h2>Uber - przejazd</h2>
 
-  <div class="form-group">
-    <label for="from">Skąd:</label>
-    <input id="from" [(ngModel)]="from" placeholder="np. ul. X" #fromInput />
-  </div>
+  <label for="fromInput">Skąd</label>
+  <input
+    id="fromInput"
+    [(ngModel)]="from"
+    (input)="fetchSuggestions(from, 'from')"
+  />
+  <ul *ngIf="fromSuggestions.length">
+    <li
+      *ngFor="let suggestion of fromSuggestions"
+      tabindex="0"
+      role="button"
+      (click)="selectSuggestion(suggestion, 'from')"
+      (keydown.enter)="selectSuggestion(suggestion, 'from')"
+      (keydown.space)="
+        selectSuggestion(suggestion, 'from'); $event.preventDefault()
+      "
+    >
+      {{ suggestion }}
+    </li>
+  </ul>
 
-  <div class="form-group">
-    <label for="to">Dokąd:</label>
-    <input id="to" [(ngModel)]="to" placeholder="np. ul. Y" #toInput />
-  </div>
+  <label for="toInput">Dokąd</label>
+  <input id="toInput" [(ngModel)]="to" (input)="fetchSuggestions(to, 'to')" />
+  <ul *ngIf="toSuggestions.length">
+    <li
+      *ngFor="let suggestion of toSuggestions"
+      tabindex="0"
+      role="button"
+      (click)="selectSuggestion(suggestion, 'to')"
+      (keydown.enter)="selectSuggestion(suggestion, 'to')"
+      (keydown.space)="
+        selectSuggestion(suggestion, 'to'); $event.preventDefault()
+      "
+    >
+      {{ suggestion }}
+    </li>
+  </ul>
 
   <p-button
     label="Zamów"
