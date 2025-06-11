@@ -10,6 +10,13 @@ export const environment = {
     storageBucket: '<!--# echo var="firebase_storage_bucket" -->',
     messagingSenderId: '<!--# echo var="firebase_messaging_sender_id" -->',
     appId: '<!--# echo var="firebase_app_id" -->',
-    measurementId: '<!--# echo var="firebase_measurement_id" -->'
+    measurementId: '<!--# echo var="firebase_measurement_id" -->',
+  },
+  amplifyConfig: {
+    aws_project_region: "<!--# echo var='AWS_PROJECT_REGION' -->",
+    aws_cognito_region: "<!--# echo var='AWS_COGNITO_REGION' -->",
+    aws_user_pools_id: "<!--# echo var='AWS_USER_POOLS_ID' -->",
+    aws_user_pools_web_client_id:
+      "<!--# echo var='AWS_USER_POOLS_WEB_CLIENT_ID' -->",
   },
 };

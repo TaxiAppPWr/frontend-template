@@ -1,1 +1,169 @@
-<p>work works!</p>
+<div class="container mx-auto px-4 py-8 max-w-2xl">
+  <h1 class="text-2xl font-bold mb-6 text-center">Panel Kierowcy</h1>
+
+  <!-- Success Message -->
+  <div *ngIf="successMessage" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+    {{ successMessage }}
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Work Status Controls -->
+  <div *ngIf="!isWorking && !currentRide" class="bg-white p-6 rounded-lg shadow-md mb-6">
+    <h2 class="text-xl font-semibold mb-4">Status Pracy</h2>
+    <p class="mb-4 text-gray-600">Obecnie nie pracujesz. Kliknij przycisk poniżej, aby rozpocząć pracę i otrzymywać zlecenia.</p>
+    <div class="flex justify-center">
+      <button (click)="startWorking()" class="px-6 py-3 bg-green-600 text-white font-medium rounded-md shadow hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+        Rozpocznij Pracę
+      </button>
+    </div>
+  </div>
+
+  <!-- Working Status -->
+  <div *ngIf="isWorking && !currentRide && !rideProposal" class="bg-white p-6 rounded-lg shadow-md mb-6">
+    <h2 class="text-xl font-semibold mb-4">Status Pracy</h2>
+    <div class="flex items-center justify-center mb-4">
+      <div class="relative">
+        <div class="animate-ping absolute h-3 w-3 rounded-full bg-green-400 opacity-75"></div>
+        <div class="relative rounded-full h-3 w-3 bg-green-500"></div>
+      </div>
+      <p class="ml-2 text-green-600 font-medium">Aktywny</p>
+    </div>
+    <p class="mb-4 text-center text-gray-600">Oczekiwanie na zlecenia...</p>
+    <div class="flex justify-center">
+      <button (click)="stopWorking()" class="px-6 py-3 bg-red-600 text-white font-medium rounded-md shadow hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+        Zakończ Pracę
+      </button>
+    </div>
+  </div>
+
+  <!-- Ride Proposal -->
+  <div *ngIf="rideProposal" class="bg-white p-6 rounded-lg shadow-md mb-6">
+    <h2 class="text-xl font-semibold mb-4">Nowe Zlecenie</h2>
+    <div class="space-y-4 mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <p class="text-sm font-medium text-gray-700">Miejsce odbioru:</p>
+          <p class="text-gray-900">{{ rideProposal.pickupAddress }}</p>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-700">Miejsce docelowe:</p>
+          <p class="text-gray-900">{{ rideProposal.dropoffAddress }}</p>
+        </div>
+      </div>
+      <div>
+        <p class="text-sm font-medium text-gray-700">Szacowana cena:</p>
+        <p class="text-lg font-semibold text-green-600">{{ rideProposal.estimatedPrice }} PLN</p>
+      </div>
+    </div>
+    <div class="flex flex-col sm:flex-row sm:space-x-4 space-y-3 sm:space-y-0">
+      <button (click)="rejectRide()" class="px-6 py-3 bg-gray-300 text-gray-800 font-medium rounded-md shadow hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 flex-1">
+        Odrzuć
+      </button>
+      <button (click)="acceptRide()" class="px-6 py-3 bg-green-600 text-white font-medium rounded-md shadow hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 flex-1">
+        Akceptuj
+      </button>
+    </div>
+  </div>
+
+  <!-- Current Ride - Awaiting Driver -->
+  <div *ngIf="currentRide && isAwaitingDriver(currentRide)" class="bg-white p-6 rounded-lg shadow-md mb-6">
+    <div class="bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-4">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-yellow-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm text-yellow-700">
+            Udaj się na miejsce odbioru i potwierdź przybycie.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="text-xl font-semibold mb-4">Aktualny Przejazd</h2>
+    <div class="space-y-4 mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <p class="text-sm font-medium text-gray-700">Miejsce odbioru:</p>
+          <p class="text-gray-900">{{ currentRide.pickupAddress }}</p>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-700">Miejsce docelowe:</p>
+          <p class="text-gray-900">{{ currentRide.dropoffAddress }}</p>
+        </div>
+      </div>
+      <div>
+        <p class="text-sm font-medium text-gray-700">Szacowana cena:</p>
+        <p class="text-lg font-semibold text-green-600">{{ currentRide.estimatedPrice }} PLN</p>
+      </div>
+    </div>
+    <div class="flex justify-center">
+      <button (click)="confirmArrival()" class="px-6 py-3 bg-blue-600 text-white font-medium rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+        Potwierdź Przybycie
+      </button>
+    </div>
+  </div>
+
+  <!-- Current Ride - In Progress -->
+  <div *ngIf="currentRide && isInProgress(currentRide)" class="bg-white p-6 rounded-lg shadow-md mb-6">
+    <div class="bg-blue-100 border-l-4 border-blue-500 p-4 mb-4">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+            <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H11a1 1 0 001-1v-5h2a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7h-2V5h2v2z" />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm text-blue-700">
+            Przejazd w trakcie. Po dotarciu do celu, zakończ przejazd.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="text-xl font-semibold mb-4">Aktualny Przejazd</h2>
+    <div class="space-y-4 mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <p class="text-sm font-medium text-gray-700">Miejsce odbioru:</p>
+          <p class="text-gray-900">{{ currentRide.pickupAddress }}</p>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-700">Miejsce docelowe:</p>
+          <p class="text-gray-900">{{ currentRide.dropoffAddress }}</p>
+        </div>
+      </div>
+      <div>
+        <p class="text-sm font-medium text-gray-700">Szacowana cena:</p>
+        <p class="text-lg font-semibold text-green-600">{{ currentRide.estimatedPrice }} PLN</p>
+      </div>
+    </div>
+    <div class="flex justify-center">
+      <button (click)="finishRide()" class="px-6 py-3 bg-green-600 text-white font-medium rounded-md shadow hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+        Zakończ Przejazd
+      </button>
+    </div>
+  </div>
+
+  <!-- Ride Cancelled Notification -->
+  <div *ngIf="rideCancelled" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+    <div class="flex items-center">
+      <div class="flex-shrink-0">
+        <svg class="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+        </svg>
+      </div>
+      <div class="ml-3">
+        <p class="font-medium">Przejazd został anulowany przez pasażera.</p>
+        <button (click)="dismissCancellation()" class="text-sm underline mt-1">Zamknij</button>
+      </div>
+    </div>
+  </div>
+</div>

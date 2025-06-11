@@ -7,7 +7,7 @@ import { HttpClient } from '@angular/common/http';
 
 @Injectable({ providedIn: 'root' })
 export class MessagingService {
-  message$: Observable<{ body: string; title: string }> | undefined;
+  message$: Observable<{ body: string; title: string }> | undefined
 
   constructor(
     private readonly msg: Messaging,

@@ -1,9 +1,18 @@
-<nav class="nav flex items-center justify-between px-4 py-2 bg-gray-100">
-<!--  <div class="flex space-x-4">-->
-<!--    <a routerLink="/ride" routerLinkActive="active">Passager</a>-->
-<!--    <a routerLink="/geo" routerLinkActive="active">Driver</a>-->
-<!--  </div>-->
-  <button class="ml-auto px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Logout</button>
+<nav *ngIf="authenticated" class="nav flex items-center justify-between px-4 py-2 bg-gray-100">
+  <!-- Driver Navigation -->
+  <div *ngIf="userType === 'driver'" class="flex space-x-4">
+    <a routerLink="/driver" routerLinkActive="text-blue-600 font-medium" [routerLinkActiveOptions]="{exact: true}" class="py-2 px-3 hover:bg-gray-200 rounded">Panel główny</a>
+    <a routerLink="/driver/rides" routerLinkActive="text-blue-600 font-medium" class="py-2 px-3 hover:bg-gray-200 rounded">Przejazdy</a>
+    <a routerLink="/driver/account" routerLinkActive="text-blue-600 font-medium" class="py-2 px-3 hover:bg-gray-200 rounded">Moje konto</a>
+  </div>
+
+  <!-- Empty div for other user types to maintain layout -->
+  <div *ngIf="userType !== 'driver'"></div>
+
+  <div class="flex items-center ml-auto">
+    <span class="mr-4 text-gray-700">{{ userEmail }}</span>
+    <button (click)="logout()" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Wyloguj</button>
+  </div>
 </nav>
 
 <router-outlet></router-outlet>

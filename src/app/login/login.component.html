@@ -1,0 +1,14 @@
+<div class="flex items-center justify-center min-h-screen bg-gray-100">
+  <div class="w-full max-w-md">
+    <amplify-authenticator
+      [loginMechanisms]="['email']"
+      [signUpAttributes]="[
+        'email',
+        'family_name',
+        'given_name',
+        'phone_number']"
+      [services]="services"
+    >
+    </amplify-authenticator>
+  </div>
+</div>

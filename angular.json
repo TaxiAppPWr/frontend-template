@@ -24,7 +24,10 @@
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "sass",
             "assets": ["src/favicon.ico", "src/assets", "src/firebase-messaging-sw.js"],
-            "styles": ["src/styles.sass"],
+            "styles": [
+              "src/styles.sass",
+              "node_modules/@aws-amplify/ui-angular/theme.css"
+            ],
             "scripts": []
           },
           "configurations": {
@@ -82,7 +85,10 @@
             "tsConfig": "tsconfig.spec.json",
             "inlineStyleLanguage": "sass",
             "assets": ["src/favicon.ico", "src/assets", "src/firebase-messaging-sw.js"],
-            "styles": ["src/styles.sass"],
+            "styles": [
+              "src/styles.sass",
+              "node_modules/@aws-amplify/ui-angular/theme.css"
+            ],
             "scripts": []
           }
         }

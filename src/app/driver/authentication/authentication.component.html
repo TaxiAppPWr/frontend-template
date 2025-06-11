@@ -1,1 +1,222 @@
-<p>authentication works!</p>
+<div class="container mx-auto px-4 py-8 max-w-2xl">
+  <h1 class="text-2xl font-bold mb-6 text-center">Weryfikacja Kierowcy</h1>
+
+  <!-- Status Card -->
+  <div *ngIf="authStatus !== 'WAITING_FOR_SUBMIT'" [ngClass]="getStatusColorClass()" class="border px-4 py-3 rounded-lg mb-6">
+    <div class="flex justify-between items-center">
+      <div>
+        <p class="font-bold">Status wniosku: <span class="font-bold uppercase tracking-wider">{{ getStatusLabel() }}</span></p>
+        <p class="text-sm mt-1">{{ getStatusDescription() }}</p>
+      </div>
+      <button
+        *ngIf="shouldShowCancelButton()"
+        (click)="onCancelAuthentication()"
+        [disabled]="isCancelling"
+        class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50">
+        <span *ngIf="isCancelling">Anulowanie...</span>
+        <span *ngIf="!isCancelling">Anuluj wniosek</span>
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="successMessage" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+    {{ successMessage }}
+  </div>
+
+  <form (ngSubmit)="onSubmit()" class="space-y-6" *ngIf="shouldShowForm()">
+    <!-- Driver Information -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+      <h2 class="text-xl font-semibold mb-4">Informacje o Kierowcy</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Numer Prawa Jazdy</label>
+          <input
+            type="text"
+            [(ngModel)]="driverData.driverLicenceNumber"
+            name="driverLicenceNumber"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md"
+            required>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Numer Dowodu Rejestracyjnego</label>
+          <input
+            type="text"
+            [(ngModel)]="driverData.registrationDocumentNumber"
+            name="registrationDocumentNumber"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md"
+            required>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Numer Rejestracyjny</label>
+          <input
+            type="text"
+            [(ngModel)]="driverData.plateNumber"
+            name="plateNumber"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md"
+            required>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">PESEL</label>
+          <input
+            type="text"
+            [(ngModel)]="driverData.pesel"
+            name="pesel"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md"
+            required>
+        </div>
+      </div>
+    </div>
+
+    <!-- Address Information -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+      <h2 class="text-xl font-semibold mb-4">Informacje Adresowe</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Ulica</label>
+          <input
+            type="text"
+            [(ngModel)]="driverData.address.street"
+            name="street"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md"
+            required>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Numer Budynku</label>
+            <input
+              type="text"
+              [(ngModel)]="driverData.address.buildingNumber"
+              name="buildingNumber"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md"
+              required>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Numer Mieszkania</label>
+            <input
+              type="text"
+              [(ngModel)]="driverData.address.apartmentNumber"
+              name="apartmentNumber"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Kod Pocztowy</label>
+          <input
+            type="text"
+            [(ngModel)]="driverData.address.postCode"
+            name="postCode"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md"
+            required>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Miasto</label>
+          <input
+            type="text"
+            [(ngModel)]="driverData.address.city"
+            name="city"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md"
+            required>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Kraj</label>
+          <input
+            type="text"
+            [(ngModel)]="driverData.address.country"
+            name="country"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md"
+            required>
+        </div>
+      </div>
+    </div>
+
+    <!-- Document Upload -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+      <h2 class="text-xl font-semibold mb-4">Wgrywanie Dokumentów</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Prawo Jazdy (Przód)</label>
+          <div class="border-2 border-dashed border-gray-300 rounded-md p-4 text-center">
+            <input
+              type="file"
+              (change)="onFrontPhotoChange($event)"
+              accept="image/*"
+              class="hidden"
+              id="frontPhoto"
+              required>
+            <label for="frontPhoto" class="cursor-pointer">
+              <div *ngIf="!driverLicenseFrontPhoto" class="text-gray-500">
+                <svg class="mx-auto h-12 w-12" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                  <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4h-8m-12 0h8m-8 0v-8m0 0v-8m0 0h8m-8 0h-8" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <p class="mt-1">Kliknij aby wgrać zdjęcie przodu</p>
+              </div>
+              <div *ngIf="driverLicenseFrontPhoto" class="text-green-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <p class="mt-1">{{ driverLicenseFrontPhoto.name }}</p>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Prawo Jazdy (Tył)</label>
+          <div class="border-2 border-dashed border-gray-300 rounded-md p-4 text-center">
+            <input
+              type="file"
+              (change)="onBackPhotoChange($event)"
+              accept="image/*"
+              class="hidden"
+              id="backPhoto"
+              required>
+            <label for="backPhoto" class="cursor-pointer">
+              <div *ngIf="!driverLicenseBackPhoto" class="text-gray-500">
+                <svg class="mx-auto h-12 w-12" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                  <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4h-8m-12 0h8m-8 0v-8m0 0v-8m0 0h8m-8 0h-8" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <p class="mt-1">Kliknij aby wgrać zdjęcie tyłu</p>
+              </div>
+              <div *ngIf="driverLicenseBackPhoto" class="text-green-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <p class="mt-1">{{ driverLicenseBackPhoto.name }}</p>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="flex justify-center">
+      <button
+        type="submit"
+        class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+        [disabled]="isSubmitting">
+        <span *ngIf="isSubmitting">
+          Wysyłanie...
+        </span>
+        <span *ngIf="!isSubmitting">
+          Prześlij Dane Uwierzytelniające
+        </span>
+      </button>
+    </div>
+  </form>
+</div>

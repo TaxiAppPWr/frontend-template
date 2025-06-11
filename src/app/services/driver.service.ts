@@ -5,7 +5,7 @@ import {
   map,
   Observable,
   Subject,
-  Subscription,
+  Subscription, tap,
   throttleTime,
 } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
@@ -17,14 +17,57 @@ interface AccountStatus {
 }
 
 interface RideProposal {
-  id: string;
-  passengerName: string;
-  pickupLocation: string;
-  destination: string;
+  driverId: string;
+  rideId: number;
+  pickupAddress: string;
+  pickupLatitude: number;
+  pickupLongitude: number;
+  dropoffAddress: string;
+  dropoffLatitude: number;
+  dropoffLongitude: number;
+  estimatedPrice: number;
+  eventType: string;
+}
+
+export enum RideStatus {
+  NEW,
+  AWAITING_PAYMENT,
+  PAYMENT_RECEIVED,
+  AWAITING_DRIVER,
+  IN_PROGRESS,
+  FINISHED,
+  CANCELLED,
+}
+
+export interface Ride {
+  rideId: number;
+  status: RideStatus;
 }
 
 interface RideCancelled {
-  id: string;
+  driverId: string;
+  rideId: number;
+  eventType: string;
+}
+
+export interface Ride {
+  rideId: number;
+
+}
+
+export interface DriverAuthData {
+  driverLicenceNumber: string;
+  registrationDocumentNumber: string;
+  plateNumber: string;
+  pesel: string;
+  address: {
+    street: string;
+    buildingNumber: string;
+    apartmentNumber: string | null;
+    postCode: string;
+    city: string;
+    country: string;
+  };
 }
 
 @Injectable({
@@ -38,8 +81,8 @@ export class DriverService {
 
   public error$: Subject<string> = new Subject<string>();
 
-  public rideCancelled$: Observable<any> | undefined = undefined;
-  public newRideProposal$: Observable<any> | undefined = undefined;
+  public rideCancelled$: Observable<RideCancelled> | null = null;
+  public newRideProposal$: Observable<RideProposal> | null = null;
 
   constructor(
     private readonly websocket: WebsocketService,
@@ -49,27 +92,27 @@ export class DriverService {
   getDriverAuthenticationStatus(): Observable<string> {
     return this.http
       .get<{
-        success: boolean;
-        data: { status: string };
+        status: string;
       }>(`${environment.backendUrl}/api/driver-auth/status`)
-      .pipe(map((response) => response.data.status));
+      .pipe(map((response) => response.status));
   }
 
-  public startReporting(): boolean {
+  public async startReporting(): Promise<boolean> {
     if (!navigator.geolocation) {
       this.error$.next(
         'Geolokalizacja nie jest wspierana przez Twoją przeglądarkę.',
       );
       return false;
     }
-    this.websocket.connect();
-    if (this.websocket.getObservable()) {
-      this.newRideProposal$ = this.websocket
-        .getObservable()!
-        .pipe(filter((event) => event.type === 'ride_proposal'));
-      this.rideCancelled$ = this.websocket
-        .getObservable()!
-        .pipe(filter((event) => event.type === 'ride_cancelled'));
+    await this.websocket.connect();
+    if (await this.websocket.getObservable()) {
+      this.newRideProposal$ = (await this.websocket
+        .getObservable())!
+        .pipe(filter((event) => event.eventType === 'RIDE_OFFER'));
+      this.rideCancelled$ = (await this.websocket
+        .getObservable())!.pipe(
+        filter((event) => event.eventType === 'RIDE_CANCELLED')
+      );
 
       this.reporting = true;
       this.reportingSub = new Observable<GeolocationPosition>((observer) => {
@@ -119,18 +162,13 @@ export class DriverService {
   }
 
   getAccountStatus(): Observable<AccountStatus> {
-    console.log('Wywoływany endpoint: balance');
-    return this.http
-      .get<{
-        success: boolean;
-        data: AccountStatus;
-      }>(`${environment.backendUrl}/api/paycheck/balance`)
-      .pipe(map((response) => response.data));
+    return this.http.get<AccountStatus>(
+      `${environment.backendUrl}/api/paycheck/balance`,
+    );
   }
 
-  public getCurrentRide(): Observable<any> {
-    // TODO: Implement when backend is ready
-    return this.http.get(`${environment.backendUrl}/api/ride/current`);
+  public getCurrentRide(): Observable<Ride> {
+    return this.http.get<Ride>(`${environment.backendUrl}/api/ride/driver`);
   }
 
   public sendRideConfirmation(
@@ -139,43 +177,75 @@ export class DriverService {
   ): Observable<any> {
     return this.http.post(
       `${environment.backendUrl}/api/matching/confirm`,
-      JSON.stringify({
+      {
         rideId: rideId,
         accepted: accepted,
-      }),
+      },
     );
   }
 
   public confirmArrival(rideId: number): Observable<any> {
     return this.http.post(
-      // TODO: Verify url
-      `${environment.backendUrl}/api/ride/arrival`,
-      JSON.stringify({
-        rideId: rideId,
-      }),
+      `${environment.backendUrl}/api/ride/arrived?rideId=${rideId}`, {}
     );
   }
 
   public finishRide(rideId: number): Observable<any> {
     return this.http.post(
-      `${environment.backendUrl}/api/ride/finish`,
-      JSON.stringify({
-        rideId: rideId,
-      }),
+      `${environment.backendUrl}/api/ride/finish?rideId=${rideId}`, {}
     );
   }
 
   private sendLocation(position: GeolocationPosition) {
     if (
       !this.websocket.sendMessage({
-        action: 'position',
+        action: 'location-update',
         latitude: position.coords.latitude,
         longitude: position.coords.longitude,
+        isActive: true,
       })
     ) {
       console.error('Failed to send position');
       return false;
     }
     return true;
+  }
+
+  submitDriverAuthentication(
+    driverData: DriverAuthData,
+    driverLicenseFrontPhoto: File,
+    driverLicenseBackPhoto: File,
+  ): Observable<any> {
+    const formData = new FormData();
+
+    // Add JSON data as a blob
+    const jsonBlob = new Blob([JSON.stringify(driverData)], {
+      type: 'application/json',
+    });
+    formData.append('request', jsonBlob, 'data');
+
+    // Add files
+    formData.append(
+      'driverLicenseFrontPhoto',
+      driverLicenseFrontPhoto,
+      driverLicenseFrontPhoto.name,
+    );
+    formData.append(
+      'driverLicenseBackPhoto',
+      driverLicenseBackPhoto,
+      driverLicenseBackPhoto.name,
+    );
+
+    return this.http.post(
+      `${environment.backendUrl}/api/driver-auth`,
+      formData,
+    );
+  }
+
+  cancelDriverAuthentication(): Observable<any> {
+    return this.http.delete(
+      `${environment.backendUrl}/api/driver-auth`,
+      {},
+    );
   }
 }

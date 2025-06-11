@@ -15,7 +15,7 @@ export class UserService {
       .pipe(map((response) => response.data));
   }
 
-  requestNewRide(pickupLocation, destination) {}
+  requestNewRide(pickupLocation: never, destination: never) {}
 
   autocompleteLocations(query: string) {
     // TODO: Use maps service for autocompletion

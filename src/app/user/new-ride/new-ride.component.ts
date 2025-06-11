@@ -94,6 +94,24 @@ export class NewRideComponent implements AfterViewInit {
       });
   }
 
+  cancelRide() {
+    this.from = '';
+    this.to = '';
+    this.passengerUsername = '';
+    this.price = null;
+    this.showOffer = false;
+    this.showSummary = false;
+    this.rideId = null;
+
+    // TODO: Send cancellation request to backend
+
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Anulowano',
+      detail: 'Przejazd został anulowany',
+    });
+  }
+
   confirm() {
     const body = {
       passengerUsername: this.passengerUsername,

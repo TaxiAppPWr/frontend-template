@@ -18,18 +18,20 @@ export class NotificationComponent implements OnInit {
   constructor(private messagingService: MessagingService) {}
 
   ngOnInit(): void {
-    this.messagingService.message$.subscribe((message) => {
-      if (message) {
-        this.notification = message;
-        this.showNotification = true;
+    if (this.messagingService.message$) {
+      this.messagingService.message$.subscribe((message) => {
+        if (message) {
+          this.notification = message;
+          this.showNotification = true;
 
-        // Auto-hide after 5 seconds
-        clearTimeout(this.timeout);
-        this.timeout = setTimeout(() => {
-          this.closeNotification();
-        }, 5000);
-      }
-    });
+          // Auto-hide after 5 seconds
+          clearTimeout(this.timeout);
+          this.timeout = setTimeout(() => {
+            this.closeNotification();
+          }, 5000);
+        }
+      });
+    }
   }
 
   closeNotification(): void {
