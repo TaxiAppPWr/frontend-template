@@ -39,7 +39,7 @@ jobs:
       - name: Update docker-compose.yml image tag (github.sha)
         run: |
           pip install yq
-          yq -i '.services.app.image = "${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_REPOSITORY }}:${{ github.sha }}"' docker-compose.yml
+          yq -i -y '.services.app.image = "${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_REPOSITORY }}:${{ github.sha }}"' docker-compose.yml
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
