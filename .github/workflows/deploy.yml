@@ -1,0 +1,66 @@
+name: Deploy Docker Compose to EC2 Auto Scaling Group
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  AWS_REGION: us-east-1
+  DOCKERHUB_REPOSITORY: taxiapp-frontend
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Registry
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        id: build-and-push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_REPOSITORY }}:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_REPOSITORY }}:latest
+
+      - name: Update docker-compose.yml image tag (github.sha)
+        run: |
+          pip install yq
+          yq -i '.services.app.image = "${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_REPOSITORY }}:${{ github.sha }}"' docker-compose.yml
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Get S3 bucket and ASG name from SSM
+        id: ssm
+        run: |
+          S3_BUCKET=$(aws ssm get-parameter --name "/actions/s3.bucket.name" --query "Parameter.Value" --output text)
+          ASG_NAME=$(aws ssm get-parameter --name "/actions/asg.name" --query "Parameter.Value" --output text)
+          echo "s3_bucket=$S3_BUCKET" >> $GITHUB_OUTPUT
+          echo "asg_name=$ASG_NAME" >> $GITHUB_OUTPUT
+
+      - name: Upload updated docker-compose.yml to S3
+        run: |
+          aws s3 cp docker-compose.yml s3://${{ steps.ssm.outputs.s3_bucket }}/docker-compose.yml
+
+      - name: Trigger ASG Instance Refresh
+        run: |
+          aws autoscaling start-instance-refresh --auto-scaling-group-name ${{ steps.ssm.outputs.asg_name }} --region ${{ env.AWS_REGION }}
