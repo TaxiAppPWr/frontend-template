@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  app:
+    image: kubamik/taxiapp-frontend:latest
+    ports:
+      - "80:80"
+    env_file:
+      - .env
+    environment:
+      - BACKEND_URL
+      - WEBSOCKET_URL
+      - FIREBASE_VAPID_KEY
+      - FIREBASE_API_KEY
+      - FIREBASE_AUTH_DOMAIN
+      - FIREBASE_PROJECT_ID
+      - FIREBASE_STORAGE_BUCKET
+      - FIREBASE_MESSAGING_SENDER_ID
+      - FIREBASE_APP_ID
+      - FIREBASE_MEASUREMENT_ID
+      - AWS_PROJECT_REGION
+      - AWS_COGNITO_REGION
+      - AWS_USER_POOLS_ID
+      - AWS_USER_POOLS_WEB_CLIENT_ID
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: us-east-1
+        awslogs-create-group: "true"
+        awslogs-group: taxiapp-frontend
