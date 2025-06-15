@@ -1,31 +1,61 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map } from 'rxjs';
+import { Observable } from 'rxjs';
+import { AutocompleteList, Ride, RideProposal } from './models';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UserService {
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
-  getCurrentRide() {
-    // TODO: Implement when backend is ready
-    return this.http
-      .get<{ success: boolean; data: any }>(`/api/user/current-ride`)
-      .pipe(map((response) => response.data));
+  getCurrentRide(): Observable<Ride> {
+    return this.http.get<Ride>(`${environment.backendUrl}/api/ride/passenger`);
   }
 
-  requestNewRide(pickupLocation: never, destination: never) {}
-
-  autocompleteLocations(query: string) {
-    // TODO: Use maps service for autocompletion
+  requestNewRide(
+    pickupLocation: string,
+    destination: string,
+  ): Observable<RideProposal> {
+    return this.http.post<RideProposal>(
+      `${environment.backendUrl}/api/ride/new
+      ?originId=${encodeURIComponent(pickupLocation)}
+      &destinationId=${encodeURIComponent(destination)}`,
+      {},
+    );
   }
 
-  acceptProposedRide(rideId: number) {}
+  autocompleteLocations(query: string): Observable<AutocompleteList> {
+    return this.http.get<AutocompleteList>(
+      `${environment.backendUrl}/api/maps/autocomplete?input=${encodeURIComponent(query)}`,
+    );
+  }
 
-  rejectProposedRide(rideId: number) {}
+  acceptProposedRide(rideId: number): Observable<void> {
+    return this.http.post<void>(
+      `${environment.backendUrl}/api/ride//accept/passenger?rideId=${rideId}`,
+      {},
+    );
+  }
 
-  cancelRide() {}
+  rejectProposedRide(rideId: number) {
+    return this.http.post<void>(
+      `${environment.backendUrl}/api/ride/reject/passenger?rideId=${rideId}`,
+      {},
+    );
+  }
 
-  getRidePaymentUrl(rideId: number) {}
+  cancelRide(rideId: number) {
+    return this.http.post<void>(
+      `${environment.backendUrl}/api/ride/cancel?rideId=${rideId}`,
+      {},
+    );
+  }
+
+  getRidePaymentUrl(rideId: number) {
+    return this.http.get<string>(
+      `${environment.backendUrl}/api/passengerPayment/paymentLink?rideId=${rideId}`,
+    );
+  }
 }

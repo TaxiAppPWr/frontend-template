@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { DriverService, RideStatus } from '../../services/driver.service';
+import { DriverService } from '../../services/driver.service';
+import { RideStatus } from '../../services/models';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
@@ -45,6 +46,11 @@ export class WorkComponent implements OnInit, OnDestroy {
     // Subscribe to error messages
     this.errorSubscription = this.driverService.error$.subscribe((error) => {
       this.errorMessage = error;
+      if (this.currentRide == null && this.rideProposal == null) {
+        // If there's no current ride or proposal, stop working
+        this.stopWorking();
+      }
+
       setTimeout(() => (this.errorMessage = ''), 5000);
     });
   }
@@ -64,7 +70,6 @@ export class WorkComponent implements OnInit, OnDestroy {
     this.driverService.getCurrentRide().subscribe({
       next: (ride) => {
         if (ride) {
-          console.log("Aktualny przejazd:", ride);
           this.currentRide = ride;
           // If there's a current ride, start working automatically
           if (!this.isWorking) {
@@ -79,7 +84,7 @@ export class WorkComponent implements OnInit, OnDestroy {
   }
 
   async startWorking() {
-    if (await this.driverService.startReporting()) {
+    if (this.driverService.startReporting()) {
       this.isWorking = true;
       this.successMessage = 'Rozpoczęto pracę. Oczekiwanie na zlecenia...';
       setTimeout(() => (this.successMessage = ''), 3000);
@@ -213,14 +218,10 @@ export class WorkComponent implements OnInit, OnDestroy {
   }
 
   isAwaitingDriver(currentRide: any): boolean {
-    return (
-      currentRide && currentRide.status == 'AWAITING_DRIVER'
-    );
+    return currentRide && this.currentRide.status == 'AWAITING_DRIVER';
   }
 
   isInProgress(currentRide: any): boolean {
-    return (
-      currentRide && currentRide.status == 'IN_PROGRESS'
-    );
+    return this.currentRide && this.currentRide.status == 'IN_PROGRESS';
   }
 }

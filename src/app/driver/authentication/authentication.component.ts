@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { DriverService, DriverAuthData } from '../../services/driver.service';
+import { DriverAuthData } from '../../services/models';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import {DriverService} from "../../services/driver.service";
 
 @Component({
   selector: 'app-authentication',

@@ -1,69 +1,62 @@
-<div class="container">
+<div class="flex flex-col items-center justify-center min-h-[60vh] bg-white rounded-lg shadow-lg p-8 max-w-md mx-auto">
   <p-toast></p-toast>
-  <h2>Uber - przejazd</h2>
+  <h2 class="text-2xl font-bold mb-6 text-gray-800">Zamów przejazd</h2>
 
-  <label for="fromInput">Skąd</label>
-  <input
-    id="fromInput"
-    [(ngModel)]="from"
-    (input)="fetchSuggestions(from, 'from')"
-  />
-  <ul *ngIf="fromSuggestions.length">
-    <li
-      *ngFor="let suggestion of fromSuggestions"
-      tabindex="0"
-      role="button"
-      (click)="selectSuggestion(suggestion, 'from')"
-      (keydown.enter)="selectSuggestion(suggestion, 'from')"
-      (keydown.space)="
-        selectSuggestion(suggestion, 'from'); $event.preventDefault()
-      "
-    >
-      {{ suggestion }}
-    </li>
-  </ul>
-
-  <label for="toInput">Dokąd</label>
-  <input id="toInput" [(ngModel)]="to" (input)="fetchSuggestions(to, 'to')" />
-  <ul *ngIf="toSuggestions.length">
-    <li
-      *ngFor="let suggestion of toSuggestions"
-      tabindex="0"
-      role="button"
-      (click)="selectSuggestion(suggestion, 'to')"
-      (keydown.enter)="selectSuggestion(suggestion, 'to')"
-      (keydown.space)="
-        selectSuggestion(suggestion, 'to'); $event.preventDefault()
-      "
-    >
-      {{ suggestion }}
-    </li>
-  </ul>
-
-  <p-button
-    label="Zamów"
-    (onClick)="showPrice()"
-    [disabled]="!from.trim() || !to.trim()"
-    styleClass="p-button-sm p-button-primary"
-  ></p-button>
-
-  <div class="offer" *ngIf="showOffer">
-    <p *ngIf="price !== null">
-      <strong>Cena przejazdu:</strong> {{ price }} zł
-    </p>
-    <p-button
-      label="Tak"
-      (onClick)="confirm()"
-      styleClass="p-button-sm p-button-success"
-    ></p-button>
-    <p-button
-      label="Nie"
-      (onClick)="cancelRide()"
-      styleClass="p-button-sm p-button-danger"
-    ></p-button>
+  <div class="w-full mb-4">
+    <label for="fromInput" class="block text-gray-700 font-semibold mb-1">Skąd</label>
+    <input
+      id="fromInput"
+      [(ngModel)]="from"
+      (input)="fetchSuggestions(from, 'from')"
+      class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+      placeholder="Wpisz miejsce początkowe"
+      autocomplete="off"
+    />
+    <ul *ngIf="fromSuggestions.length" class="bg-white border border-gray-200 rounded shadow mt-1 max-h-40 overflow-y-auto">
+      <li
+        *ngFor="let suggestion of fromSuggestions"
+        tabindex="0"
+        role="button"
+        (click)="selectSuggestion(suggestion, 'from')"
+        (keydown.enter)="selectSuggestion(suggestion, 'from')"
+        (keydown.space)="selectSuggestion(suggestion, 'from'); $event.preventDefault()"
+        class="px-4 py-2 hover:bg-blue-100 cursor-pointer"
+      >
+        {{ suggestion.name }}
+      </li>
+    </ul>
   </div>
 
-  <div class="summary" *ngIf="showSummary">
-    <p>Przejazd: {{ from }} → {{ to }} | {{ price }} zł</p>
+  <div class="w-full mb-6">
+    <label for="toInput" class="block text-gray-700 font-semibold mb-1">Dokąd</label>
+    <input
+      id="toInput"
+      [(ngModel)]="to"
+      (input)="fetchSuggestions(to, 'to')"
+      class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+      placeholder="Wpisz miejsce docelowe"
+      autocomplete="off"
+    />
+    <ul *ngIf="toSuggestions.length" class="bg-white border border-gray-200 rounded shadow mt-1 max-h-40 overflow-y-auto">
+      <li
+        *ngFor="let suggestion of toSuggestions"
+        tabindex="0"
+        role="button"
+        (click)="selectSuggestion(suggestion, 'to')"
+        (keydown.enter)="selectSuggestion(suggestion, 'to')"
+        (keydown.space)="selectSuggestion(suggestion, 'to'); $event.preventDefault()"
+        class="px-4 py-2 hover:bg-blue-100 cursor-pointer"
+      >
+        {{ suggestion.name }}
+      </li>
+    </ul>
   </div>
+
+  <button
+    class="w-full bg-blue-600 text-white font-semibold py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
+    [disabled]="!fromId || !toId || loading"
+    (click)="orderRide()"
+  >
+    {{ loading ? 'Zamawianie...' : 'Zamów przejazd' }}
+  </button>
 </div>

@@ -1,2 +1,2 @@
-<app-ride-status *ngIf="hasRide"></app-ride-status>
-<app-new-ride *ngIf="!hasRide"></app-new-ride>
+<app-ride-status *ngIf="hasRide" (rideRemoved)="removeRide()" [ride]="ride"></app-ride-status>
+<app-new-ride *ngIf="!hasRide" (rideCreated)="updateFromProposal($event)"></app-new-ride>

@@ -1,8 +1,11 @@
 import { CanActivateFn, Router } from '@angular/router';
 import { fetchAuthSession } from '@aws-amplify/auth';
 import { inject } from '@angular/core';
+import { environment } from '../../environments/environment';
 
 export const authGuard: CanActivateFn = async (route, state) => {
+  if (!environment.requireLogin) return true; // Skip authentication if login is not required
+
   const router = inject(Router);
   const url = state.url;
 
@@ -24,7 +27,7 @@ export const authGuard: CanActivateFn = async (route, state) => {
 
     // If no token, not authenticated
     if (!idToken || !idToken.payload) {
-      router.navigate([getLoginRoute(url)]);
+      await router.navigate([getLoginRoute(url)]);
       return false;
     }
 
@@ -39,7 +42,7 @@ export const authGuard: CanActivateFn = async (route, state) => {
       const isDriver = tokenClaims['custom:isDriver'] === 'true';
 
       if (!isDriver) {
-        router.navigate(['/user']);
+        await router.navigate(['/user']);
         return false;
       }
       return true;
@@ -50,7 +53,7 @@ export const authGuard: CanActivateFn = async (route, state) => {
         Array.isArray(userGroups) && userGroups.includes('employee');
 
       if (!isEmployee) {
-        router.navigate(['/']);
+        await router.navigate(['/']);
         return false;
       }
       return true;
@@ -60,7 +63,7 @@ export const authGuard: CanActivateFn = async (route, state) => {
     return true;
   } catch (error) {
     console.error('Authentication error:', error);
-    router.navigate([getLoginRoute(url)]);
+    await router.navigate([getLoginRoute(url)]);
     return false;
   }
 };

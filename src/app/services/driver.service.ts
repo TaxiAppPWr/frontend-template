@@ -5,70 +5,19 @@ import {
   map,
   Observable,
   Subject,
-  Subscription, tap,
+  Subscription,
   throttleTime,
 } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 
-interface AccountStatus {
-  balance: number;
-  currency: string;
-}
-
-interface RideProposal {
-  driverId: string;
-  rideId: number;
-  pickupAddress: string;
-  pickupLatitude: number;
-  pickupLongitude: number;
-  dropoffAddress: string;
-  dropoffLatitude: number;
-  dropoffLongitude: number;
-  estimatedPrice: number;
-  eventType: string;
-}
-
-export enum RideStatus {
-  NEW,
-  AWAITING_PAYMENT,
-  PAYMENT_RECEIVED,
-  AWAITING_DRIVER,
-  IN_PROGRESS,
-  FINISHED,
-  CANCELLED,
-}
-
-export interface Ride {
-  rideId: number;
-  status: RideStatus;
-}
-
-interface RideCancelled {
-  driverId: string;
-  rideId: number;
-  eventType: string;
-}
-
-export interface Ride {
-  rideId: number;
-
-}
-
-export interface DriverAuthData {
-  driverLicenceNumber: string;
-  registrationDocumentNumber: string;
-  plateNumber: string;
-  pesel: string;
-  address: {
-    street: string;
-    buildingNumber: string;
-    apartmentNumber: string | null;
-    postCode: string;
-    city: string;
-    country: string;
-  };
-}
+import {
+  AccountStatus,
+  DriverAuthData,
+  Ride,
+  RideCancelled,
+  RideProposal,
+} from './models';
 
 @Injectable({
   providedIn: 'root',
@@ -97,54 +46,56 @@ export class DriverService {
       .pipe(map((response) => response.status));
   }
 
-  public async startReporting(): Promise<boolean> {
+  public startReporting(): boolean {
     if (!navigator.geolocation) {
       this.error$.next(
         'Geolokalizacja nie jest wspierana przez Twoją przeglądarkę.',
       );
       return false;
     }
-    await this.websocket.connect();
-    if (await this.websocket.getObservable()) {
-      this.newRideProposal$ = (await this.websocket
-        .getObservable())!
-        .pipe(filter((event) => event.eventType === 'RIDE_OFFER'));
-      this.rideCancelled$ = (await this.websocket
-        .getObservable())!.pipe(
-        filter((event) => event.eventType === 'RIDE_CANCELLED')
-      );
-
-      this.reporting = true;
-      this.reportingSub = new Observable<GeolocationPosition>((observer) => {
-        const watchId = navigator.geolocation.watchPosition(
-          (pos) => {
-            observer.next(pos);
-          },
-          (err) => {
-            observer.error(err);
-          },
-          {
-            enableHighAccuracy: true,
-          },
-        );
-        return () => navigator.geolocation.clearWatch(watchId);
-      })
-        .pipe(throttleTime(300000)) // Throttle to every 5 minutes
-        .subscribe({
-          next: (position: GeolocationPosition) => {
-            if (!this.sendLocation(position)) {
-              this.error$.next('Nie udało się wysłać pozycji.');
-            }
-          },
-          error: (error) => {
-            this.error$.next(`Błąd geolokalizacji: ${error.message}`);
+    this.websocket.connect().then(() => {
+      if (this.websocket.getObservable()) {
+        this.websocket.getObservable()?.subscribe({
+          error: (err) => {
+            console.error('WebSocket error:', err);
+            this.error$.next('Błąd połączenia z serwerem.');
           },
         });
-      return true;
-    } else {
-      this.error$.next('Nie udało się połączyć z serwerem.');
-      return false;
-    }
+        this.newRideProposal$ = this.websocket
+          .getObservable()!
+          .pipe(filter((event) => event.eventType === 'RIDE_OFFER'));
+        this.rideCancelled$ = this.websocket
+          .getObservable()!
+          .pipe(filter((event) => event.eventType === 'RIDE_CANCELLED'));
+      }
+    });
+    this.reporting = true;
+    this.reportingSub = new Observable<GeolocationPosition>((observer) => {
+      const watchId = navigator.geolocation.watchPosition(
+        (pos) => {
+          observer.next(pos);
+        },
+        (err) => {
+          observer.error(err);
+        },
+        {
+          enableHighAccuracy: true,
+        },
+      );
+      return () => navigator.geolocation.clearWatch(watchId);
+    })
+      .pipe(throttleTime(300000)) // Throttle to every 5 minutes
+      .subscribe({
+        next: (position: GeolocationPosition) => {
+          if (!this.sendLocation(position)) {
+            this.error$.next('Nie udało się wysłać pozycji.');
+          }
+        },
+        error: (error) => {
+          this.error$.next(`Błąd geolokalizacji: ${error.message}`);
+        },
+      });
+    return true;
   }
 
   public stopReporting(): boolean {
@@ -175,24 +126,23 @@ export class DriverService {
     rideId: number,
     accepted: boolean,
   ): Observable<any> {
-    return this.http.post(
-      `${environment.backendUrl}/api/matching/confirm`,
-      {
-        rideId: rideId,
-        accepted: accepted,
-      },
-    );
+    return this.http.post(`${environment.backendUrl}/api/matching/confirm`, {
+      rideId: rideId,
+      accepted: accepted,
+    });
   }
 
   public confirmArrival(rideId: number): Observable<any> {
     return this.http.post(
-      `${environment.backendUrl}/api/ride/arrived?rideId=${rideId}`, {}
+      `${environment.backendUrl}/api/ride/arrived?rideId=${rideId}`,
+      {},
     );
   }
 
   public finishRide(rideId: number): Observable<any> {
     return this.http.post(
-      `${environment.backendUrl}/api/ride/finish?rideId=${rideId}`, {}
+      `${environment.backendUrl}/api/ride/finish?rideId=${rideId}`,
+      {},
     );
   }
 
@@ -243,9 +193,6 @@ export class DriverService {
   }
 
   cancelDriverAuthentication(): Observable<any> {
-    return this.http.delete(
-      `${environment.backendUrl}/api/driver-auth`,
-      {},
-    );
+    return this.http.delete(`${environment.backendUrl}/api/driver-auth`, {});
   }
 }

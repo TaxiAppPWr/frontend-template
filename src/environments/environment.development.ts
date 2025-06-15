@@ -1,7 +1,8 @@
 export const environment = {
+  requireLogin: false,
   production: false,
-  backendUrl: 'https://alwar2ajgh.execute-api.us-east-1.amazonaws.com',
-  websocketUrl: 'wss://6s6fwck3ef.execute-api.us-east-1.amazonaws.com/$default',
+  backendUrl: 'https://nu9ndk5by7.execute-api.us-east-1.amazonaws.com',
+  websocketUrl: 'wss://echo.websocket.org',
   firebaseVapidKey:
     'BAPByYebs3sr6p5g5oVlp8frTHbNKugNSYLOKHTVWcD-fGha0M4RT8hfZD8KWKOXkKrBBi1IIFWmjXTrM8PHLTA',
   firebaseConfig: {
@@ -16,7 +17,7 @@ export const environment = {
   amplifyConfig: {
     aws_project_region: 'us-east-1',
     aws_cognito_region: 'us-east-1',
-    aws_user_pools_id: 'us-east-1_OnYvgrp61',
-    aws_user_pools_web_client_id: '2q4mlss0hkk1ilfg4ngn9fu40m',
+    aws_user_pools_id: 'us-east-1_jGCyPgOhY',
+    aws_user_pools_web_client_id: '7buht6uirucnqo1278u84acgol',
   },
 };

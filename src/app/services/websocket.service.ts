@@ -13,13 +13,14 @@ export class WebsocketService {
   public async connect(): Promise<void> {
     if (!this.socket$ || this.socket$.closed) {
       const session = await fetchAuthSession();
+
       const token = session?.tokens?.accessToken?.toString() ?? '';
       this.socket$ = webSocket(`${environment.websocketUrl}?token=${token}`);
     }
   }
 
   public sendMessage(message: any): boolean {
-    console.log('Sending websocket message:', message);
+    console.log('Sending message:', message);
     if (this.socket$ && !this.socket$.closed) {
       this.socket$.next(message);
       return true;
@@ -29,18 +30,8 @@ export class WebsocketService {
     }
   }
 
-  public getObservable(): Promise<Observable<any> | undefined> {
-    return new Promise((resolve) => {
-      if (!this.socket$ || this.socket$.closed) {
-        this.connect().then(
-          () => resolve(this.socket$?.asObservable()),
-          (error) => {
-            console.error('WebSocket connection failed:', error);
-            resolve(undefined);
-          },
-        );
-      }
-    });
+  public getObservable(): Observable<any> | undefined {
+    return this.socket$?.asObservable();
   }
 
   public disconnect(): void {
