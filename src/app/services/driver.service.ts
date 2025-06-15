@@ -6,6 +6,7 @@ import {
   Observable,
   Subject,
   Subscription,
+  tap,
   throttleTime,
 } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
@@ -46,29 +47,38 @@ export class DriverService {
       .pipe(map((response) => response.status));
   }
 
-  public startReporting(): boolean {
+  public async startReporting(): Promise<boolean> {
     if (!navigator.geolocation) {
       this.error$.next(
         'Geolokalizacja nie jest wspierana przez Twoją przeglądarkę.',
       );
       return false;
     }
-    this.websocket.connect().then(() => {
-      if (this.websocket.getObservable()) {
-        this.websocket.getObservable()?.subscribe({
-          error: (err) => {
-            console.error('WebSocket error:', err);
-            this.error$.next('Błąd połączenia z serwerem.');
-          },
-        });
-        this.newRideProposal$ = this.websocket
-          .getObservable()!
-          .pipe(filter((event) => event.eventType === 'RIDE_OFFER'));
-        this.rideCancelled$ = this.websocket
-          .getObservable()!
-          .pipe(filter((event) => event.eventType === 'RIDE_CANCELLED'));
-      }
-    });
+    await this.websocket.connect()
+    if (this.websocket.getObservable()) {
+      this.websocket.getObservable()?.subscribe({
+        error: (err) => {
+          console.error('WebSocket error:', err);
+          this.error$.next('Błąd połączenia z serwerem.');
+        },
+      });
+      this.websocket.getObservable()?.subscribe({
+        next: (message) => console.log(message),
+      });
+      this.newRideProposal$ = this.websocket.getObservable()!.pipe(
+        tap((event) => {
+          console.log('New ride proposal received:', event);
+        }),
+        filter((event) => event.eventType === 'RIDE_OFFER'),
+        tap((event) => {
+          console.log('New ride proposal received:', event);
+        }),
+      );
+      this.rideCancelled$ = this.websocket
+        .getObservable()!
+        .pipe(filter((event) => event.eventType === 'RIDE_CANCELLED'));
+    }
+
     this.reporting = true;
     this.reportingSub = new Observable<GeolocationPosition>((observer) => {
       const watchId = navigator.geolocation.watchPosition(

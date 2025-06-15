@@ -1,7 +1,8 @@
 // notification.component.ts
-import { Component, OnInit } from '@angular/core';
+import {Component, OnDestroy, OnInit, ChangeDetectorRef} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MessagingService } from '../services/messaging.service';
+import {Subscription} from "rxjs";
 
 @Component({
   selector: 'app-notification',
@@ -10,20 +11,27 @@ import { MessagingService } from '../services/messaging.service';
   templateUrl: './notification.component.html',
   styleUrl: './notification.component.sass',
 })
-export class NotificationComponent implements OnInit {
+export class NotificationComponent implements OnInit, OnDestroy {
+  unsubscribe: Subscription | null = null;
   notification: any = null;
   showNotification = false;
   private timeout: any;
 
-  constructor(private messagingService: MessagingService) {}
+  constructor(
+    private messagingService: MessagingService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
+    this.messagingService.init();
     if (this.messagingService.message$) {
-      this.messagingService.message$.subscribe((message) => {
+      this.unsubscribe = this.messagingService.message$.subscribe((message) => {
         if (message) {
+          console.log('Received Notification:', message);
           this.notification = message;
           this.showNotification = true;
 
+          this.cdr.detectChanges(); // <-- Add this line
           // Auto-hide after 5 seconds
           clearTimeout(this.timeout);
           this.timeout = setTimeout(() => {
@@ -34,7 +42,15 @@ export class NotificationComponent implements OnInit {
     }
   }
 
+  ngOnDestroy(): void {
+    if (this.unsubscribe) {
+      this.unsubscribe.unsubscribe();
+    }
+    clearTimeout(this.timeout);
+  }
+
   closeNotification(): void {
     this.showNotification = false;
+    this.cdr.detectChanges();
   }
 }

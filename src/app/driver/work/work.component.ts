@@ -84,7 +84,7 @@ export class WorkComponent implements OnInit, OnDestroy {
   }
 
   async startWorking() {
-    if (this.driverService.startReporting()) {
+    if (await this.driverService.startReporting()) {
       this.isWorking = true;
       this.successMessage = 'Rozpoczęto pracę. Oczekiwanie na zlecenia...';
       setTimeout(() => (this.successMessage = ''), 3000);
@@ -120,6 +120,7 @@ export class WorkComponent implements OnInit, OnDestroy {
 
   stopWorking() {
     if (this.driverService.stopReporting()) {
+      console.log('Stopped');
       this.isWorking = false;
       this.successMessage = 'Zakończono pracę.';
       setTimeout(() => (this.successMessage = ''), 3000);

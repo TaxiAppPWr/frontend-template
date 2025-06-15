@@ -4,6 +4,7 @@ import { signUp, SignUpInput, SignUpOutput } from 'aws-amplify/auth';
 import { AmplifyAuthenticatorModule } from '@aws-amplify/ui-angular';
 import { Hub } from 'aws-amplify/utils';
 import {AuthService} from "../services/auth.service";
+import {MessagingService} from "../services/messaging.service";
 
 @Component({
   selector: 'app-login',
@@ -17,7 +18,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     handleSignUp(input: SignUpInput): Promise<SignUpOutput>;
   };
   constructor(private readonly router: Router,
-              private readonly authService: AuthService) {
+              private readonly authService: AuthService,
+              private readonly messagingService: MessagingService) {
     this.services = {
       handleSignUp: async (input: SignUpInput): Promise<SignUpOutput> => {
         const { username, password, options } = input;
@@ -63,6 +65,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     });
     this.unsubscribeHub = Hub.listen('auth', ({ payload }) => {
       if (payload.event === 'signedIn') {
+        this.messagingService.postToken()
         this.router.navigate([this.routePrefix()]);
       }
     });

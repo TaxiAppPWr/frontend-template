@@ -17,15 +17,15 @@
     <div>
       <div class="text-gray-700 mb-1">
         <span class="font-semibold">Cena:</span>
-        {{ currentRide.fare | number:'1.2-2' }} zł
+        {{ (currentRide.fare / 100) | number:'1.2-2' }} zł
       </div>
       <div class="text-gray-700 mb-1">
         <span class="font-semibold">Dystans:</span>
-        {{ currentRide.distance | number:'1.2-2' }} km
+        {{ (currentRide.distance / 1000) | number:'1.2-2' }} km
       </div>
       <div class="text-gray-700 mb-1">
         <span class="font-semibold">Czas:</span>
-        {{ currentRide.duration | number:'1.0-0' }} min
+        {{ (currentRide.duration / 60) | number:'1.0-0' }} min
       </div>
     </div>
     <div class="flex gap-2 mt-2">

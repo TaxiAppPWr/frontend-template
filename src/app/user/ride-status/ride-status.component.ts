@@ -1,7 +1,7 @@
 import {
   Component,
   EventEmitter,
-  Input,
+  Input, OnChanges,
   OnDestroy,
   OnInit,
   Output,
@@ -27,7 +27,7 @@ import { UserService } from '../../services/user.service';
   templateUrl: './ride-status.component.html',
   styleUrl: './ride-status.component.sass',
 })
-export class RideStatusComponent implements OnInit, OnDestroy {
+export class RideStatusComponent implements OnInit, OnDestroy, OnChanges {
   @Input() ride: Ride | null = null;
   @Output() rideRemoved = new EventEmitter<void>();
 
@@ -161,6 +161,7 @@ export class RideStatusComponent implements OnInit, OnDestroy {
 
   getStatusLabel(status: RideStatus | null): string {
     switch (status) {
+
       case RideStatus.NEW:
         return 'Nowy (oczekuje na akceptację)';
       case RideStatus.AWAITING_PAYMENT:

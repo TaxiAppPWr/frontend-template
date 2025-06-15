@@ -27,8 +27,6 @@ export class AppComponent implements OnInit {
   title = 'angular-template';
 
   ngOnInit() {
-    this.messaging.init();
-
     // Determine user type based on current route
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {

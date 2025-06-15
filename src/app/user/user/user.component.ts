@@ -1,9 +1,9 @@
-import {Component, OnInit, OnDestroy} from '@angular/core';
-import {UserService} from '../../services/user.service';
-import {RideStatusComponent} from '../ride-status/ride-status.component';
-import {NgIf} from '@angular/common';
-import {NewRideComponent} from '../new-ride/new-ride.component';
-import {Ride, RideRequestResponse, RideStatus} from "../../services/models";
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { UserService } from '../../services/user.service';
+import { RideStatusComponent } from '../ride-status/ride-status.component';
+import { NgIf } from '@angular/common';
+import { NewRideComponent } from '../new-ride/new-ride.component';
+import { Ride, RideRequestResponse, RideStatus } from '../../services/models';
 import { MessageService } from 'primeng/api';
 
 @Component({
@@ -29,15 +29,30 @@ export class UserComponent implements OnInit, OnDestroy {
   }
 
   getRide() {
-    this.userService.getCurrentRide().subscribe((ride) => {
-      this.hasRide = !!ride;
-      this.ride = ride;
-      if (this.hasRide && !this.ridePollingInterval) {
-        this.ridePollingInterval = setInterval(() => this.updateRide(), 10000);
-      }
-      if (!this.hasRide && this.ridePollingInterval) {
-        clearInterval(this.ridePollingInterval);
-        this.ridePollingInterval = null;
+    this.userService.getCurrentRide().subscribe({
+      next: (ride) => {
+        this.hasRide = !!ride;
+        this.ride = ride;
+        if (this.hasRide && !this.ridePollingInterval) {
+          this.ridePollingInterval = setInterval(
+            () => this.updateRide(),
+            10000,
+          );
+        }
+        if (!this.hasRide && this.ridePollingInterval) {
+          clearInterval(this.ridePollingInterval);
+          this.ridePollingInterval = null;
+        }
+      },
+      error: (err) => {
+        if (err.status === 404) {
+          this.hasRide = false;
+          this.ride = null;
+          if (this.ridePollingInterval) {
+            clearInterval(this.ridePollingInterval);
+            this.ridePollingInterval = null;
+          }
+        }
       }
     });
   }

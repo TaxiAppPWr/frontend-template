@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { AutocompleteList, Ride, RideProposal } from './models';
 import { environment } from '../../environments/environment';
 
@@ -19,9 +19,7 @@ export class UserService {
     destination: string,
   ): Observable<RideProposal> {
     return this.http.post<RideProposal>(
-      `${environment.backendUrl}/api/ride/new
-      ?originId=${encodeURIComponent(pickupLocation)}
-      &destinationId=${encodeURIComponent(destination)}`,
+      `${environment.backendUrl}/api/ride/new?originId=${encodeURIComponent(pickupLocation)}&destinationId=${encodeURIComponent(destination)}`,
       {},
     );
   }
@@ -54,8 +52,12 @@ export class UserService {
   }
 
   getRidePaymentUrl(rideId: number) {
-    return this.http.get<string>(
-      `${environment.backendUrl}/api/passengerPayment/paymentLink?rideId=${rideId}`,
-    );
+    return this.http
+      .get<{
+        body: string;
+      }>(
+        `${environment.backendUrl}/api/passengerPayment/paymentLink?rideId=${rideId}`,
+      )
+      .pipe(map((response) => response.body));
   }
 }
