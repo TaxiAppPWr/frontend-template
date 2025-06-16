@@ -7,13 +7,13 @@ import { getMessaging, onBackgroundMessage } from "https://www.gstatic.com/fireb
 
 
 initializeApp({
-  apiKey: 'AIzaSyBbXZkOGYK3K8kyxITqcw69UceL7581RYg',
-  authDomain: 'taxiapp-pwr.firebaseapp.com',
-  projectId: 'taxiapp-pwr',
-  storageBucket: 'taxiapp-pwr.firebasestorage.app',
-  messagingSenderId: '95786131885',
-  appId: '1:95786131885:web:d5f52f73a379cf9b958124',
-  measurementId: 'G-YKEBH8HVPW',
+  apiKey: '<!--# echo var="firebase_api_key" -->',
+  authDomain: '<!--# echo var="firebase_auth_domain" -->',
+  projectId: '<!--# echo var="firebase_project_id" -->',
+  storageBucket: '<!--# echo var="firebase_storage_bucket" -->',
+  messagingSenderId: '<!--# echo var="firebase_messaging_sender_id" -->',
+  appId: '<!--# echo var="firebase_app_id" -->',
+  measurementId: '<!--# echo var="firebase_measurement_id" -->',
 });
 
 const messaging = getMessaging();
