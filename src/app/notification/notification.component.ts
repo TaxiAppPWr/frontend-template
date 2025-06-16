@@ -1,8 +1,8 @@
 // notification.component.ts
-import {Component, OnDestroy, OnInit, ChangeDetectorRef} from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MessagingService } from '../services/messaging.service';
-import {Subscription} from "rxjs";
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-notification',
@@ -19,7 +19,7 @@ export class NotificationComponent implements OnInit, OnDestroy {
 
   constructor(
     private messagingService: MessagingService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -36,7 +36,7 @@ export class NotificationComponent implements OnInit, OnDestroy {
           clearTimeout(this.timeout);
           this.timeout = setTimeout(() => {
             this.closeNotification();
-          }, 5000);
+          }, 10000);
         }
       });
     }
