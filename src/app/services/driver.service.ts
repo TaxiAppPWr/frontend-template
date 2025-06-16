@@ -3,7 +3,7 @@ import { WebsocketService } from './websocket.service';
 import {
   filter,
   map,
-  Observable,
+  Observable, sampleTime, startWith,
   Subject,
   Subscription,
   tap,
@@ -101,13 +101,13 @@ export class DriverService {
       );
       return () => navigator.geolocation.clearWatch(watchId);
     })
-      .pipe(throttleTime(20000)) // Throttle to every 5 minutes
+      .pipe(sampleTime(10000))
       .subscribe({
         next: (position: GeolocationPosition) => {
           if (!this.sendLocation(position)) {
             this.error$.next({
               msg: 'Nie udało się wysłać pozycji.',
-              severe: false,
+              severe: true,
             });
           }
         },
@@ -115,6 +115,12 @@ export class DriverService {
           this.error$.next({
             msg: `Błąd geolokalizacji: ${error.message}`,
             severe: false,
+          });
+        },
+        complete: () => {
+          this.error$.next({
+            msg: '',
+            severe: true,
           });
         },
       });
