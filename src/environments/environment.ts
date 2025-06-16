@@ -14,10 +14,10 @@ export const environment = {
     measurementId: '<!--# echo var="firebase_measurement_id" -->',
   },
   amplifyConfig: {
-    aws_project_region: "<!--# echo var='AWS_PROJECT_REGION' -->",
-    aws_cognito_region: "<!--# echo var='AWS_COGNITO_REGION' -->",
-    aws_user_pools_id: "<!--# echo var='AWS_USER_POOLS_ID' -->",
+    aws_project_region: "<!--# echo var='aws_project_region' -->",
+    aws_cognito_region: "<!--# echo var='aws_cognito_region' -->",
+    aws_user_pools_id: "<!--# echo var='aws_user_pools_id' -->",
     aws_user_pools_web_client_id:
-      "<!--# echo var='AWS_USER_POOLS_WEB_CLIENT_ID' -->",
+      "<!--# echo var='aws_user_pool_web_client_id' -->",
   },
 };

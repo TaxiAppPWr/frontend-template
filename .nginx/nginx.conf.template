@@ -19,10 +19,10 @@ server {
             set $firebase_messaging_sender_id "${FIREBASE_MESSAGING_SENDER_ID}";
             set $firebase_app_id "${FIREBASE_APP_ID}";
             set $firebase_measurement_id "${FIREBASE_MEASUREMENT_ID}";
-            set $AWS_PROJECT_REGION "${AWS_PROJECT_REGION}";
-            set $AWS_COGNITO_REGION "${AWS_COGNITO_REGION}";
-            set $AWS_USER_POOLS_ID "${AWS_USER_POOLS_ID}";
-            set $AWS_USER_POOLS_WEB_CLIENT_ID "${AWS_USER_POOLS_WEB_CLIENT_ID}";
+            set $aws_project_region "${AWS_PROJECT_REGION}";
+            set $aws_cognito_region "${AWS_COGNITO_REGION}";
+            set $aws_user_pools_id "${AWS_USER_POOLS_ID}";
+            set $aws_user_pool_web_client_id "${AWS_USER_POOLS_WEB_CLIENT_ID}";
     }
 
 

@@ -53,19 +53,31 @@ export class UserComponent implements OnInit, OnDestroy {
             this.ridePollingInterval = null;
           }
         }
-      }
+      },
     });
   }
 
   updateRide() {
     if (!this.hasRide) return;
-    this.userService.getCurrentRide().subscribe((ride) => {
-      this.hasRide = !!ride;
-      this.ride = ride;
-      if (!this.hasRide && this.ridePollingInterval) {
-        clearInterval(this.ridePollingInterval);
-        this.ridePollingInterval = null;
-      }
+    this.userService.getCurrentRide().subscribe({
+      next: (ride) => {
+        this.hasRide = !!ride;
+        this.ride = ride;
+        if (!this.hasRide && this.ridePollingInterval) {
+          clearInterval(this.ridePollingInterval);
+          this.ridePollingInterval = null;
+        }
+      },
+      error: (err) => {
+        if (err.status === 404) {
+          this.hasRide = false;
+          this.ride = null;
+          if (this.ridePollingInterval) {
+            clearInterval(this.ridePollingInterval);
+            this.ridePollingInterval = null;
+          }
+        }
+      },
     });
   }
 
