@@ -2,7 +2,7 @@ export const environment = {
   requireLogin: true,
   production: true,
   backendUrl: '<!--# echo var="backend_url" -->',
-  websocketUrl: '<!--# echo var="websocket_url" -->',
+  websocketUrl: '<!--# echo var="websocket_url" -->/$default',
   firebaseVapidKey: '<!--# echo var="firebase_vapid_key" -->',
   firebaseConfig: {
     apiKey: '<!--# echo var="firebase_api_key" -->',
