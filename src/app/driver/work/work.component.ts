@@ -45,8 +45,12 @@ export class WorkComponent implements OnInit, OnDestroy {
 
     // Subscribe to error messages
     this.errorSubscription = this.driverService.error$.subscribe((error) => {
-      this.errorMessage = error;
-      if (this.currentRide == null && this.rideProposal == null) {
+      this.errorMessage = error.msg;
+      if (
+        error.severe &&
+        this.currentRide == null &&
+        this.rideProposal == null
+      ) {
         // If there's no current ride or proposal, stop working
         this.stopWorking();
       }

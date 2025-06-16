@@ -29,7 +29,10 @@ export class DriverService {
 
   private reportingSub: Subscription | undefined = undefined;
 
-  public error$: Subject<string> = new Subject<string>();
+  public error$: Subject<{ msg: string; severe: boolean }> = new Subject<{
+    msg: string;
+    severe: boolean;
+  }>();
 
   public rideCancelled$: Observable<RideCancelled> | null = null;
   public newRideProposal$: Observable<RideProposal> | null = null;
@@ -49,17 +52,21 @@ export class DriverService {
 
   public async startReporting(): Promise<boolean> {
     if (!navigator.geolocation) {
-      this.error$.next(
-        'Geolokalizacja nie jest wspierana przez Twoją przeglądarkę.',
-      );
+      this.error$.next({
+        msg: 'Geolokalizacja nie jest wspierana przez Twoją przeglądarkę.',
+        severe: true,
+      });
       return false;
     }
-    await this.websocket.connect()
+    await this.websocket.connect();
     if (this.websocket.getObservable()) {
       this.websocket.getObservable()?.subscribe({
         error: (err) => {
           console.error('WebSocket error:', err);
-          this.error$.next('Błąd połączenia z serwerem.');
+          this.error$.next({
+            msg: 'Błąd połączenia z serwerem.',
+            severe: true,
+          });
         },
       });
       this.websocket.getObservable()?.subscribe({
@@ -94,15 +101,21 @@ export class DriverService {
       );
       return () => navigator.geolocation.clearWatch(watchId);
     })
-      .pipe(throttleTime(300000)) // Throttle to every 5 minutes
+      .pipe(throttleTime(20000)) // Throttle to every 5 minutes
       .subscribe({
         next: (position: GeolocationPosition) => {
           if (!this.sendLocation(position)) {
-            this.error$.next('Nie udało się wysłać pozycji.');
+            this.error$.next({
+              msg: 'Nie udało się wysłać pozycji.',
+              severe: false,
+            });
           }
         },
         error: (error) => {
-          this.error$.next(`Błąd geolokalizacji: ${error.message}`);
+          this.error$.next({
+            msg: `Błąd geolokalizacji: ${error.message}`,
+            severe: false,
+          });
         },
       });
     return true;
@@ -110,7 +123,10 @@ export class DriverService {
 
   public stopReporting(): boolean {
     if (this.hasRide) {
-      this.error$.next('Nie możesz zakończyć pracy w trakcie przejazdu!');
+      this.error$.next({
+        msg: 'Nie możesz zakończyć pracy w trakcie przejazdu!',
+        severe: false,
+      });
       return false;
     }
     if (this.reportingSub) {
